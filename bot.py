@@ -247,7 +247,7 @@ def start_userbot_login(user_id, bot, message):
         bot.reply_to(message, "⏳ You already have a login session in progress. Please complete or cancel it.")
         return
     login_sessions[user_id] = {"step": "phone", "phone": None, "client": None, "message_id": None}
-    bot.reply_to(message, "📱 Please enter your **phone number** (with country code, e.g., +1234567890):\n\nType `/cancel` to abort.")
+    bot.reply_to(message, "📱 Please enter your phone number (with country code, e.g., +1234567890):\n\nType /cancel to abort.")
 
 def cancel_login(user_id, bot, message):
     if user_id in login_sessions:
@@ -283,7 +283,7 @@ def process_login_step(user_id, text, bot, message):
             session["sent_code"] = sent_code
             client.stop()  # temporarily stop
             session["step"] = "otp"
-            bot.reply_to(message, f"✅ OTP sent to **{phone}**. Please enter the code you received:")
+            bot.reply_to(message, f"✅ OTP sent to {phone}. Please enter the code you received:")
         except Exception as e:
             bot.reply_to(message, f"❌ Error sending OTP: {e}")
             del login_sessions[user_id]
@@ -312,7 +312,7 @@ def process_login_step(user_id, text, bot, message):
                 # Now start the userbot with the session string
                 success = start_userbot(session_string, user_id)
                 if success:
-                    bot.reply_to(message, "✅ Userbot deployed successfully! You can now use `/ubspam`, `/ubnc`, `/ubdc`.")
+                    bot.reply_to(message, "✅ Userbot deployed successfully! You can now use /ubspam, /ubnc, /ubdc.")
                 else:
                     bot.reply_to(message, "❌ Failed to start userbot. Check logs.")
                 del login_sessions[user_id]
@@ -435,7 +435,7 @@ def build_menu_text(label: str, state: BotState, chat_id: int) -> str:
 
     lines = [
         "╔════════════════════════════════╗",
-        f"║   ✨·˚ 𝑺𝑰𝑫 𝑩𝒐𝒕 [{label}] ˚·✨   ║",
+        f"║   ✨·˚ SID Bot [{label}] ˚·✨   ║",
         "║   💕 your premium assistant 💕  ║",
         "╠════════════════════════════════╣",
         f"║ 🌸 Spam        : {yn(spam_on)}  ║",
@@ -451,7 +451,7 @@ def build_menu_text(label: str, state: BotState, chat_id: int) -> str:
         f"║ 🚀 Userbot     : {ub_stat}   ║",
         "╚════════════════════════════════╝",
         "",
-        "📌 **Quick commands:**",
+        "📌 Quick commands:",
         "  /spam <text>  /nc <name>  /dc <desc>",
         "  /spamoff  /ncoff  /dcoff",
         "  /auto_delete <id>  /react <emoji>",
@@ -479,7 +479,7 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
         save_all_states()
 
     # --------------------------------------
-    # 🏠 MAIN MENU (with inline refresh & buttons)
+    # 🏠 MAIN MENU (with inline refresh & buttons) - NO parse_mode
     # --------------------------------------
     @bot.message_handler(commands=["start", "menu"])
     def send_menu(message):
@@ -496,7 +496,8 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
             telebot.types.InlineKeyboardButton("🚀 Host Userbot", callback_data="host_ub"),
             telebot.types.InlineKeyboardButton("⛔ Stop Userbot", callback_data="stop_ub")
         )
-        bot.send_message(chat_id, text, parse_mode="Markdown", reply_markup=markup)
+        # Send without parse_mode to avoid formatting errors
+        bot.send_message(chat_id, text, reply_markup=markup)
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith("refresh_"))
     def refresh_callback(call):
@@ -505,7 +506,8 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
             bot.answer_callback_query(call.id, "⛔ Not authorized")
             return
         new_text = build_menu_text(label, state, chat_id)
-        bot.edit_message_text(new_text, call.message.chat.id, call.message.message_id, parse_mode="Markdown")
+        # Edit without parse_mode
+        bot.edit_message_text(new_text, call.message.chat.id, call.message.message_id, reply_markup=call.message.reply_markup)
         bot.answer_callback_query(call.id, "✨ Refreshed!")
 
     @bot.callback_query_handler(func=lambda call: call.data == "host_ub")
@@ -706,7 +708,8 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
             target_id = int(arg)
             state.auto_delete.setdefault(chat_id, set()).add(target_id)
             save()
-            bot.reply_to(message, f"✨ Auto delete ON for `{target_id}`", parse_mode="Markdown")
+            # No parse_mode to avoid issues
+            bot.reply_to(message, f"✨ Auto delete ON for {target_id}")
         except ValueError:
             bot.reply_to(message, "Usage: /auto_delete <user_id>")
 
@@ -746,7 +749,7 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
             uid = int(target)
             state.subadmins.add(uid)
             save()
-            bot.reply_to(message, f"✨ `{uid}` added as subadmin", parse_mode="Markdown")
+            bot.reply_to(message, f"✨ {uid} added as subadmin")
         except ValueError:
             try:
                 member = bot.get_chat_member(message.chat.id, target)
@@ -768,7 +771,7 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
             uid = int(target)
             state.subadmins.discard(uid)
             save()
-            bot.reply_to(message, f"🌷 `{uid}` removed", parse_mode="Markdown")
+            bot.reply_to(message, f"🌷 {uid} removed")
         except ValueError:
             try:
                 member = bot.get_chat_member(message.chat.id, target)
@@ -784,7 +787,7 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
         if not state.subadmins:
             bot.reply_to(message, "No subadmins yet.")
             return
-        bot.reply_to(message, "✨ Subadmins:\n" + "\n".join(f"  ✦ `{uid}`" for uid in state.subadmins), parse_mode="Markdown")
+        bot.reply_to(message, "✨ Subadmins:\n" + "\n".join(f"  ✦ {uid}" for uid in state.subadmins))
 
     # --------------------------------------
     # 🚀 USERBOT DEPLOY / UNDEPLOY (via commands)
@@ -937,7 +940,7 @@ def register_handlers(bot: telebot.TeleBot, state: BotState, label: str):
         bot.reply_to(message, "💖 Userbot DC started | /ubdc off to stop")
 
     # --------------------------------------
-    # 🔄 STATUS COMMAND (legacy)
+    # 🔄 STATUS COMMAND (legacy) - no parse_mode
     # --------------------------------------
     @bot.message_handler(commands=["status"])
     def show_status(message):
