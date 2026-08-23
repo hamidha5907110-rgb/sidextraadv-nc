@@ -1576,7 +1576,6 @@ def build_menu_text(label: str, state: BotState, chat_id: int) -> str:
     # Premium Layout
     return f"""
 💎 <b>𝗦𝗜𝗗 𝗦𝗣𝗘𝗘𝗗𝗨𝗣 𝗕𝗢𝗧𝗦 [ {label} ]</b> 💎
-<i>Premium Hoster & Advanced Spam Engine</i>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🚀 <b>𝗛𝗢𝗦𝗧𝗘𝗥 𝗦𝗧𝗔𝗧𝗨𝗦</b>
