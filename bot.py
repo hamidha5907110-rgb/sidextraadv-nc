@@ -33,10 +33,8 @@ BOT_TOKENS = [
     "8925438420:AAEkH9ifRSQn1JNQSYbw-kaiYVXDUj4MYdo",
     "7858818327:AAExBuyJweHmYm7AgBaWlsEHLV3bPFIKF4E",
     "8799511134:AAGi965XCc-0YlEdpZFPtQz6_cJZL1epQQ4",
-    "8760147668:AAFcextp6TOEmx8AVuMkFqF_sttSEIuU9Zo",
     "8556288413:AAGSGSavd1aEGxGxspWlKGv19KYAx0G1fTE",
-    "8656976249:AAGsBCnFWMHffu6Ik98XTWCSFtOA3whsKBg",
-    # ... (add all your tokens)
+    "8656976249:AAGsBCnFWMHffu6Ik98XTWCSFtOA3whsKBg"
 ]
 
 # Pyrogram credentials (replace with your own)
